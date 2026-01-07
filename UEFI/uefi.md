@@ -34,5 +34,13 @@ sudo umount /mnt/fatimg
 # Run Qemu
 qemu-system-aarch64 -M virt -cpu cortex-a57 -m 1024     -bios /home/hao-nna/onboard-markdown/UEFI/edk2/Build/ArmVirtQemu-AArch64/RELEASE_GCC5/FV/QEMU_EFI.fd     -drive file=fatimg.img,if=none,id=drive0     -device virtio-blk-device,drive=drive0     -nographic
 
+# Test yocto on QEMU
+qemu-system-aarch64 -M virt -cpu cortex-a57 -m 4096     -bios /home/hao-nna/onboard-markdown/UEFI/edk2/Build/ArmVirtQemu-AArch64/RELEASE_GCC5/FV/QEMU_EFI.fd     -drive file=tegra-espimage-jetson-orin-nano-devkit-nvme.esp,format=raw,if=none,id=drive0     -device virtio-blk-device,drive=drive0     -drive file=/media/sshfs/core-image-full-cmdline-jetson-orin-nano-devkit-nvme.rootfs.ext4,format=raw,if=virtio     -nographic
 
+## Boot flows
+firstloader.efi --> secondLoader.enc --> kernel/rootfs --> boot
 
+## TODO:
+firstloader.efi --> secondloader.enc --> using enrolled keys to verify kernel/rootfs signature --> boot
+
+Put esp and rootfs into a single device
