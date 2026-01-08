@@ -17,11 +17,14 @@ build -a AARCH64 -t GCC5 -b RELEASE -D SECURE_BOOT_ENABLE=TRUE \
     -D INCLUDE_SHELL=TRUE -p ArmVirtPkg/ArmVirtQemu.dsc
 
 # Build Qualgo application chains
+```bash
 cd UEFI/edk2
 ln -sf ../QualgoChainPkg
 build -p QualgoChainPkg/QualgoChainPkg.dsc -a AARCH64 -t GCC5 -b RELEASE
+```
 
 # Create esp partition
+```bash
 dd if=/dev/zero of=fatimg.img bs=1M count=100
 mkfs.vfat -F 32 fatimg.img
 mkdir -p /mnt/fatimg
@@ -30,12 +33,23 @@ mkdir -p /mnt/fatimg/EFI/BOOT
 cp Build/QualgoChainPkg/RELEASE_GCC5/AARCH64/*.efi /mnt/fatimg/EFI/BOOT
 sudo python3 aes256gcm_encrypt.py /mnt/fatimg/EFI/BOOT/Uefi2.efi /mnt/fatimg/EFI/BOOT/secondLoader.enc
 sudo umount /mnt/fatimg
+```
 
 # Run Qemu
-qemu-system-aarch64 -M virt -cpu cortex-a57 -m 1024     -bios /home/hao-nna/onboard-markdown/UEFI/edk2/Build/ArmVirtQemu-AArch64/RELEASE_GCC5/FV/QEMU_EFI.fd     -drive file=fatimg.img,if=none,id=drive0     -device virtio-blk-device,drive=drive0     -nographic
+```bash
+qemu-system-aarch64 -M virt -cpu cortex-a57 -m 1024 \
+    -bios /home/hao-nna/onboard-markdown/UEFI/edk2/Build/ArmVirtQemu-AArch64/RELEASE_GCC5/FV/QEMU_EFI.fd \
+    -drive file=fatimg.img,if=none,id=drive0 -device virtio-blk-device,drive=drive0 -nographic
+```
 
 # Test yocto on QEMU
-qemu-system-aarch64 -M virt -cpu cortex-a57 -m 4096     -bios /home/hao-nna/onboard-markdown/UEFI/edk2/Build/ArmVirtQemu-AArch64/RELEASE_GCC5/FV/QEMU_EFI.fd     -drive file=tegra-espimage-jetson-orin-nano-devkit-nvme.esp,format=raw,if=none,id=drive0     -device virtio-blk-device,drive=drive0     -drive file=/media/sshfs/core-image-full-cmdline-jetson-orin-nano-devkit-nvme.rootfs.ext4,format=raw,if=virtio     -nographic
+```bash
+qemu-system-aarch64 -M virt -cpu cortex-a57 -m 4096 \
+    -bios /home/hao-nna/onboard-markdown/UEFI/edk2/Build/ArmVirtQemu-AArch64/RELEASE_GCC5/FV/QEMU_EFI.fd \
+    -drive file=tegra-espimage-jetson-orin-nano-devkit-nvme.esp,format=raw,if=none,id=drive0 \
+    -device virtio-blk-device,drive=drive0 \
+    -drive file=/media/sshfs/core-image-full-cmdline-jetson-orin-nano-devkit-nvme.rootfs.ext4,format=raw,if=virtio -nographic
+```
 
 ## Boot flows
 firstloader.efi --> secondLoader.enc --> kernel/rootfs --> boot
@@ -58,3 +72,15 @@ Set firstLoader as main application --> rename to bootaa64.efi by define EFI_PRO
 and rename efi applications
 
 See: [Kas Scripts](../kas/README.md#scripts)
+
+### How to check secureboot is enabled or not via command line
+
+```bash
+$ efivar -n 8be4df61-93ca-11d2-aa0d-00e098032b8c-SecureBoot
+```
+```
+Value:
+00000000  01
+```
++ 00: not enabled
++ 01: enabled

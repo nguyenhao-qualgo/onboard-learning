@@ -25,6 +25,7 @@ Once the build completes, all deployable files are located at: build/tmp/deploy/
     - `uefi1.efi`
     - `uefi2.efi`
     - Linux kernel `Image`
+    - initrd (TODO?)
 
 + It outputs both:
     - **X.509 keys/certificates** used for signing (`*.key`, `*.crt`)
